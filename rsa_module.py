@@ -11,13 +11,12 @@ from random import randint
 
 class RSA():
 
-    def __init__(self, keylen: int = 2048) -> None:
-        self.keylen = keylen
+    def __init__(self) -> None:
+        # self.keylen = keylen
         # self.__p = randint(1, self.keylen//2) * 2 - 1
         # self.__q = randint(1, self.keylen//2) * 2 - 1
-
-        self.__p = 53
-        self.__q = 67
+        self.__p = randint(10 ** 3, 10 ** 8)
+        self.__q = randint(10 ** 3, 10 ** 8)
         self.__keygen()
 
     def __keygen(self):
@@ -33,31 +32,33 @@ class RSA():
         # калькулятора.
         
         while not prime_checker(self.__p):
-            self.__p = randint(1, self.keylen//2) * 2 - 1
+            self.__p = randint(10 ** 2, 10 ** 3)
         
         while not prime_checker(self.__q):
-            self.__q = randint(1, self.keylen//2) * 2 - 1
+            self.__q = randint(10 ** 2, 10 ** 3)
         
         self.__n = self.__p * self.__q
-        self.__e = randint(1, 10) * 2 - 1
-        # self.__e = 17
-        self.__pq = (self.__p - 1)*(self.__q - 1)
-        while not euclidean(self.__pq, self.__e):
-            self.__e = randint(1, 25) * 2 - 1
-        self.__d = invmod(self.__e, self.__pq)
+        print(self.__p, self.__q)
+        self.__pq = (self.__p - 1) * (self.__q - 1)
+        print(self.__pq)
+        self.__e = randint(1, 200)
+        while not prime_checker(self.__e):
+            self.__e = randint(1, 200)
+        print(self.__e)
+        self.__d = pow(self.__e, -1, mod=self.__pq)
         return 1
 
     def encode(self, message):
         numbers_form = [ord(message[i]) for i in range(len(message))]
         encode_form = []
         for elem in numbers_form:
-            encode_form.append(str((elem ** self.__e) % self.__n))
+            encode_form.append(str(pow(elem, self.__e, self.__n)))
         return encode_form
 
     def decode(self, encode_form):
         messenge = ""
         for elem in encode_form:
-            messenge += chr((int(elem) ** self.__d) % self.__n)
+            messenge += chr(pow(int(elem), self.__d, self.__n))
         return messenge
 
     def get_pq(self):
@@ -79,7 +80,6 @@ class RSA():
         int_data = pow(encrypted_int_data, self.d, self.n)
         return uint_to_bytes(int_data) """
 # ------------
-
 
 def ext_euclidean(a: int, b: int):
     """
@@ -116,14 +116,14 @@ def lcm(a, b):
     return a // euclidean(a, b) * b
 
 
-def invmod(a, b):
-    """
-    Modular multiplicative inverse
-    """
-    gcd_num, x, _ = ext_euclidean(a, b)
-    if gcd_num == 1 and x < 0:
-        x += b
-    return x
+# def invmod(a, b):
+#     """
+#     Modular multiplicative inverse
+#     """
+#     gcd_num, x, _ = ext_euclidean(a, b)
+#     if gcd_num == 1 and x < 0:
+#         x += b
+#     return x
 
 
 def prime_checker(num):
