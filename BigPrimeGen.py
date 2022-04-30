@@ -19,6 +19,7 @@ firstprimes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 6
                1381, 1399, 1409, 1423, 1427, 1429, 1433, 1439, 1447, 1451, 1453, 1459,
                1471, 1481, 1483, 1487, 1489, 1493, 1499]
 
+
 def isMillerRabinPassed(prime_number):
     maxDivisionsByTwo = 0
     evenComponent = prime_number - 1
@@ -41,9 +42,10 @@ def isMillerRabinPassed(prime_number):
             return False
     return True
 
-def PrimeNumber():
+
+def PrimeNumber(num=200):
     while True:
-        prime_number = randint(10 ** 200, 10 ** 210)
+        prime_number = randint(10 ** num, 10 ** (num+10))
         flag = True
         for prime in firstprimes:
             if prime_number % prime == 0:
@@ -52,4 +54,3 @@ def PrimeNumber():
         if flag:
             if isMillerRabinPassed(prime_number):
                 return prime_number
-
