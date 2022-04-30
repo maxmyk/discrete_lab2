@@ -15,8 +15,8 @@ class RSA():
         # self.keylen = keylen
         # self.__p = randint(1, self.keylen//2) * 2 - 1
         # self.__q = randint(1, self.keylen//2) * 2 - 1
-        self.__p = randint(10 ** 3, 10 ** 8)
-        self.__q = randint(10 ** 3, 10 ** 8)
+        self.__p = randint(10 ** 6, 10 ** 12)
+        self.__q = randint(10 ** 6, 10 ** 12)
         self.__keygen()
 
     def __keygen(self):
@@ -32,10 +32,10 @@ class RSA():
         # калькулятора.
         
         while not prime_checker(self.__p):
-            self.__p = randint(10 ** 2, 10 ** 3)
+            self.__p = randint(10 ** 6, 10 ** 12)
         
         while not prime_checker(self.__q):
-            self.__q = randint(10 ** 2, 10 ** 3)
+            self.__q = randint(10 ** 6, 10 ** 12)
         
         self.__n = self.__p * self.__q
         print(self.__p, self.__q)
@@ -45,8 +45,14 @@ class RSA():
         while not prime_checker(self.__e):
             self.__e = randint(1, 200)
         print(self.__e)
-        self.__d = pow(self.__e, -1, mod=self.__pq)
-        return 1
+        while 1:
+            try:
+                self.__d = pow(self.__e, -1, mod=self.__pq)
+                break
+            except ValueError:
+                while not prime_checker(self.__e):
+                    self.__e = randint(1, 200)
+                
 
     def encode(self, message):
         numbers_form = [ord(message[i]) for i in range(len(message))]
@@ -154,7 +160,7 @@ def prime_checker(num):
     return True
 
 a = RSA()
-enc_form = a.encode('maks')
+enc_form = a.encode('Maks and Bodia')
 print(enc_form)
 dec_form = a.decode(enc_form)
 print(dec_form)
