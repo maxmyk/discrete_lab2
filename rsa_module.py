@@ -16,6 +16,8 @@ class RSA():
         self.__p = randint(10 ** 6, 10 ** 12)
         self.__q = randint(10 ** 6, 10 ** 12)
         self.__keygen()
+        self.__sec_key = (self.__d, self.__n)
+        self.__pub_key = (self.__e, self.__n)
 
     def __keygen(self):
         """
@@ -29,13 +31,10 @@ class RSA():
             self.__q = randint(10 ** 6, 10 ** 12)
 
         self.__n = self.__p * self.__q
-        print(self.__p, self.__q)
         self.__pq = (self.__p - 1) * (self.__q - 1)
-        print(self.__pq)
         self.__e = randint(1, 200)
         while not prime_checker(self.__e):
             self.__e = randint(1, 200)
-        print(self.__e)
         while 1:
             try:
                 self.__d = pow(self.__e, -1, mod=self.__pq)
@@ -46,37 +45,31 @@ class RSA():
                     self.__e = randint(1, 200)
 
     def encode(self, message):
-        numbers_form = [ord(message[i]) for i in range(len(message))]
+        numbers_form = [bin(ch)[2:] for ch in message.encode('utf8')]
+        longest_chr = len(max(numbers_form, key=lambda x: len(x)))
+        for elem in enumerate(numbers_form):
+            while len(numbers_form[elem[0]]) < longest_chr:
+                numbers_form[elem[0]] = '0'+numbers_form[elem[0]]
         encode_form = []
-        for elem in numbers_form:
+        numbers_form = ''.join(numbers_form)
+        to_encode = []
+        for i in range(0, len(numbers_form), longest_chr*2):
+            to_encode.append(int(numbers_form[0+i:longest_chr*2+i]))
+        for elem in to_encode:
             encode_form.append(str(pow(elem, self.__e, self.__n)))
         return encode_form
 
-        # bin_data = [int(bin(ch)[2:]) for ch in message.encode('utf8')]
-        """ bin_data = [bin(ch)[2:] for ch in message.encode('utf8')]
-        longest_chr = len(max(bin_data, key=lambda x: len(x)))
-        for elem in enumerate(bin_data):
-            while len(bin_data[elem[0]]) < longest_chr:
-                bin_data[elem[0]]+='2'
-            bin_data[elem[0]] = int(bin_data[elem[0]])
-        for elem in bin_data:
-            encode_form.append(str(pow(elem, self.__e, self.__n)))
-        return encode_form """
-        # str_data = "".join(bin_data)
-        # int_data = int(str_data)
-        # return pow(int_data, self.__e, self.__n)
-        # bin_data = [int_data**self.__e%self.__n for int_data in bin_data]
-        # return bin_data
-        # return int_data**self.__e%self.__n
-
     def decode(self, encode_form):
-        messenge = ""
+        message = ""
         for elem in encode_form:
-            messenge += chr(pow(int(elem), self.__d, self.__n))
-        return messenge
+            pre_chr = str(pow(int(elem), self.__d, self.__n))
+            mem = chr(int(pre_chr[-7:], 2))
+            pre_chr = pre_chr[:-7]
+            message += chr(int(pre_chr[-7:], 2))+mem
+        return message
 
-    def get_pq(self):
-        return self.__p, self.__q
+    def get_public_key(self):
+        return self.__pub_key
 
     """ def generate_signature(self, encoded_msg_digest: bytes):
         int_data = uint_from_bytes(encoded_msg_digest)
@@ -96,39 +89,39 @@ class RSA():
 # ------------
 
 
-def ext_euclidean(a: int, b: int):
-    """
-    Extended Euclidean algorithm
-    """
-    oldolds, olds, oldoldt, oldt = 1, 0, 0, 1
-    while b != 0:
-        q = a // b
-        r = a % b
-        a = b
-        b = r
-        s = oldolds - q * olds
-        t = oldoldt - q * oldt
-        oldolds = olds
-        oldoldt = oldt
-        olds = s
-        oldt = t
-    return a, oldolds, oldoldt
+# def ext_euclidean(a: int, b: int):
+#     """
+#     Extended Euclidean algorithm
+#     """
+#     oldolds, olds, oldoldt, oldt = 1, 0, 0, 1
+#     while b != 0:
+#         q = a // b
+#         r = a % b
+#         a = b
+#         b = r
+#         s = oldolds - q * olds
+#         t = oldoldt - q * oldt
+#         oldolds = olds
+#         oldoldt = oldt
+#         olds = s
+#         oldt = t
+#     return a, oldolds, oldoldt
 
 
-def euclidean(a: int, b: int):
-    """
-    GCD - Euclidean algorithm
-    """
-    while b != 0:
-        a, b = b, a % b
-    return a
+# def euclidean(a: int, b: int):
+#     """
+#     GCD - Euclidean algorithm
+#     """
+#     while b != 0:
+#         a, b = b, a % b
+#     return a
 
 
-def lcm(a, b):
-    """
-    LCM - Lowest common multiplier using GCD
-    """
-    return a // euclidean(a, b) * b
+# def lcm(a, b):
+#     """
+#     LCM - Lowest common multiplier using GCD
+#     """
+#     return a // euclidean(a, b) * b
 
 
 # def invmod(a, b):
@@ -168,17 +161,18 @@ def prime_checker(num):
                 return False
     return True
 
-
-a = RSA()
-enc_form = a.encode('Maks and Bodia')
-print(enc_form)
-dec_form = a.decode(enc_form)
-print(dec_form)
-# print(ext_euclidean(252, 198))
-# 463513
-# print(prime_checker(649879456898563))
-# print(prime_checker(463513))
-# {gcd(a,b)is x, and (oldolds)⋅ a + (oldoldt)⋅b = x}
-# a = RSA()
-# x, y = a.get_pq()
-# print(a.get_pq(), prime_checker(x), prime_checker(y))
+if __name__ == '__main__':
+    a = RSA()
+    enc_form = a.encode('Maks and Bodia')
+    print(enc_form)
+    dec_form = a.decode(enc_form)
+    print(dec_form)
+    print(a.get_public_key())
+    # print(ext_euclidean(252, 198))
+    # 463513
+    # print(prime_checker(649879456898563))
+    # print(prime_checker(463513))
+    # {gcd(a,b)is x, and (oldolds)⋅ a + (oldoldt)⋅b = x}
+    # a = RSA()
+    # x, y = a.get_pq()
+    # print(a.get_pq(), prime_checker(x), prime_checker(y))
