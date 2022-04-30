@@ -34,7 +34,7 @@ def isMillerRabinPassed(miller_rabin_candidate):
             if pow(round_tester, 2 ** i * evenComponent, miller_rabin_candidate) == miller_rabin_candidate - 1:
                 return False
         return True
-    numberOfRabinTrials = 20
+    numberOfRabinTrials = 50
     for i in range(numberOfRabinTrials):
         round_tester = randrange(2, miller_rabin_candidate)
         if trialComposite(round_tester):
@@ -43,7 +43,7 @@ def isMillerRabinPassed(miller_rabin_candidate):
 
 def PrimeNumber():
     while True:
-        prime_number = randint(10 ** 80, 10 ** 110)
+        prime_number = randint(10 ** 200, 10 ** 210)
         flag = True
         for prime in firstprimes:
             if prime_number % prime == 0:
