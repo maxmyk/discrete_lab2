@@ -1,11 +1,9 @@
-#   (fact(p−1)+1) % p == 0
 """
 Алгоритм RSA обміну ключами та відповідне кодування повідомлень цими ключами.
 Для кодування забороняється використовувати сторонні бібліотеки. Алгоритми
 обміну ключам та кодування бул розглянуті в лекціях.
 """
 
-from math import factorial, floor
 from random import randint
 
 
@@ -20,23 +18,16 @@ class RSA():
         self.__keygen()
 
     def __keygen(self):
-        # Генерування ключів.
-        # 1.Вибираємо p = 53, q = 67.
-        # 2. n = pq = 53·67 = 3551.
-        # 3. (p – 1)(q – 1) = 52·66 = 3432, e = 17.
-        # 4. (52 66) 17 3432 1817 1 1
-        # = ⋅ = =
-        # − −
-        # d e mod mod ; для обчислення можна скористатись
-        # розширеним алгоритмом Евкліда та теоремою Безу або онлайн модулярного
-        # калькулятора.
-        
+        """
+        Generates keys
+        """
+
         while not prime_checker(self.__p):
             self.__p = randint(10 ** 6, 10 ** 12)
-        
+
         while not prime_checker(self.__q):
             self.__q = randint(10 ** 6, 10 ** 12)
-        
+
         self.__n = self.__p * self.__q
         print(self.__p, self.__q)
         self.__pq = (self.__p - 1) * (self.__q - 1)
@@ -50,9 +41,9 @@ class RSA():
                 self.__d = pow(self.__e, -1, mod=self.__pq)
                 break
             except ValueError:
+                self.__e = randint(1, 200)
                 while not prime_checker(self.__e):
                     self.__e = randint(1, 200)
-                
 
     def encode(self, message):
         numbers_form = [ord(message[i]) for i in range(len(message))]
@@ -60,6 +51,23 @@ class RSA():
         for elem in numbers_form:
             encode_form.append(str(pow(elem, self.__e, self.__n)))
         return encode_form
+
+        # bin_data = [int(bin(ch)[2:]) for ch in message.encode('utf8')]
+        """ bin_data = [bin(ch)[2:] for ch in message.encode('utf8')]
+        longest_chr = len(max(bin_data, key=lambda x: len(x)))
+        for elem in enumerate(bin_data):
+            while len(bin_data[elem[0]]) < longest_chr:
+                bin_data[elem[0]]+='2'
+            bin_data[elem[0]] = int(bin_data[elem[0]])
+        for elem in bin_data:
+            encode_form.append(str(pow(elem, self.__e, self.__n)))
+        return encode_form """
+        # str_data = "".join(bin_data)
+        # int_data = int(str_data)
+        # return pow(int_data, self.__e, self.__n)
+        # bin_data = [int_data**self.__e%self.__n for int_data in bin_data]
+        # return bin_data
+        # return int_data**self.__e%self.__n
 
     def decode(self, encode_form):
         messenge = ""
@@ -69,7 +77,7 @@ class RSA():
 
     def get_pq(self):
         return self.__p, self.__q
-    
+
     """ def generate_signature(self, encoded_msg_digest: bytes):
         int_data = uint_from_bytes(encoded_msg_digest)
         return pow(int_data, self.d, self.n)
@@ -86,6 +94,7 @@ class RSA():
         int_data = pow(encrypted_int_data, self.d, self.n)
         return uint_to_bytes(int_data) """
 # ------------
+
 
 def ext_euclidean(a: int, b: int):
     """
@@ -158,6 +167,7 @@ def prime_checker(num):
             if num % p == 0:
                 return False
     return True
+
 
 a = RSA()
 enc_form = a.encode('Maks and Bodia')
