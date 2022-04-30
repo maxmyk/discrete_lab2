@@ -53,4 +53,3 @@ def PrimeNumber():
             if isMillerRabinPassed(prime_number):
                 return prime_number
 
-print(PrimeNumber())

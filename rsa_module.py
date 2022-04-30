@@ -5,6 +5,7 @@
 """
 
 from random import randint
+from BigPrimeGen import PrimeNumber
 
 
 class RSA():
@@ -13,9 +14,10 @@ class RSA():
         # self.keylen = keylen
         # self.__p = randint(1, self.keylen//2) * 2 - 1
         # self.__q = randint(1, self.keylen//2) * 2 - 1
-        self.__p = randint(10 ** 6, 10 ** 12)
-        self.__q = randint(10 ** 6, 10 ** 12)
+        self.__p = PrimeNumber()
+        self.__q = PrimeNumber()
         self.__keygen()
+
         self.__sec_key = (self.__d, self.__n)
         self.__pub_key = (self.__e, self.__n)
 
@@ -23,13 +25,6 @@ class RSA():
         """
         Generates keys
         """
-
-        while not prime_checker(self.__p):
-            self.__p = randint(10 ** 6, 10 ** 12)
-
-        while not prime_checker(self.__q):
-            self.__q = randint(10 ** 6, 10 ** 12)
-
         self.__n = self.__p * self.__q
         self.__pq = (self.__p - 1) * (self.__q - 1)
         self.__e = randint(1, 200)
@@ -164,10 +159,10 @@ def prime_checker(num):
 if __name__ == '__main__':
     a = RSA()
     enc_form = a.encode('Maks and Bodia')
-    print(enc_form)
+    # print(enc_form)
     dec_form = a.decode(enc_form)
     print(dec_form)
-    print(a.get_public_key())
+    # print(a.get_public_key())
     # print(ext_euclidean(252, 198))
     # 463513
     # print(prime_checker(649879456898563))
