@@ -10,6 +10,7 @@ from random import randint
 
 
 class RSA():
+
     def __init__(self, keylen:int = 2048) -> None:
         self.keylen = keylen
         self.__p = randint(1, self.keylen//2) * 2 - 1
@@ -44,8 +45,22 @@ class RSA():
         while not euclidean(self.__pq, self.__e):
             self.__e = randint(1, 25) * 2 - 1
         self.__d = invmod(self.__e, self.__pq)
+        return 1
 
-        
+    def encode(self, message):
+        numbers_form = []
+        for i in range(len(message)):
+            numbers_form.append(ord(message[i]))
+        encode_form = []
+        for elem in numbers_form:
+            encode_form.append(str((elem ** self.__e) % self.__n))
+        return encode_form
+
+    def decode(self, encode_form):
+        messenge = ""
+        for elem in encode_form:
+            messenge += chr((int(elem) ** self.__d) % self.__n)
+        return messenge
 
     def get_pq(self):
         return self.__p, self.__q
@@ -146,7 +161,6 @@ def prime_checker(num):
 # print(prime_checker(649879456898563))
 # print(prime_checker(463513))
 # {gcd(a,b)is x, and (oldolds)⋅ a + (oldoldt)⋅b = x}
-
-a = RSA()
-x, y = a.get_pq()
-print(a.get_pq(), prime_checker(x), prime_checker(y))
+# a = RSA()
+# x, y = a.get_pq()
+# print(a.get_pq(), prime_checker(x), prime_checker(y))
