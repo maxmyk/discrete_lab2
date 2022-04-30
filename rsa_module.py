@@ -13,11 +13,11 @@ class RSA():
 
     def __init__(self, keylen: int = 2048) -> None:
         self.keylen = keylen
-        # self.__p = randint(1, self.keylen//2) * 2 - 1
-        # self.__q = randint(1, self.keylen//2) * 2 - 1
+        self.__p = randint(1, self.keylen//2) * 2 - 1
+        self.__q = randint(1, self.keylen//2) * 2 - 1
 
-        self.__p = 53
-        self.__q = 67
+        # self.__p = 53
+        # self.__q = 67
         self.__keygen()
 
     def __keygen(self):
@@ -47,18 +47,19 @@ class RSA():
         self.__d = invmod(self.__e, self.__pq)
         return 1
 
-    def encode(self, message):
-        numbers_form = [ord(message[i]) for i in range(len(message))]
-        encode_form = []
-        for elem in numbers_form:
-            encode_form.append(str((elem ** self.__e) % self.__n))
-        return encode_form
+    # def encode(self, message):
+    #     numbers_form = [ord(message[i]) for i in range(len(message))]
+    #     encode_form = []
+    #     for elem in numbers_form:
+    #         encode_form.append(str((elem ** self.__e) % self.__n))
+    #     return encode_form
 
-    def decode(self, encode_form):
-        messenge = ""
-        for elem in encode_form:
-            messenge += chr((int(elem) ** self.__d) % self.__n)
-        return messenge
+    # def decode(self, encode_form):
+    #     messenge = ""
+    #     for elem in encode_form:
+    #         n_chr = (int(elem) ** self.__d) % self.__n
+    #         messenge += chr(n_chr)
+    #     return messenge
 
     def get_pq(self):
         return self.__p, self.__q
@@ -70,14 +71,38 @@ class RSA():
     def verify_signature(self, digital_signature: int):
         int_data = pow(digital_signature, self.e, self.n)
         return uint_to_bytes(int_data)
-
-    def encrypt(self, binary_data: bytes):
-        int_data = uint_from_bytes(binary_data)
-        return pow(int_data, self.e, self.n)
+    """
+    # """
+    def encode(self, data: str):
+        bin_data = [int(bin(ch)[2:]) for ch in data.encode('utf8')]
+        bin_data = [bin(ch)[2:] for ch in data.encode('utf8')]
+        longest_chr = len(max(bin_data, key=lambda x: len(x)))
+        for elem in enumerate(bin_data):
+            while len(bin_data[elem[0]]) < longest_chr:
+                bin_data[elem[0]]+='2'
+        str_data = "".join(bin_data)
+        int_data = int(str_data)
+        return pow(int_data, self.__e, self.__n)
+        bin_data = [int_data**self.__e%self.__n for int_data in bin_data]
+        return bin_data
+        # return int_data**self.__e%self.__n
         
-    def decrypt(self, encrypted_int_data: int):
-        int_data = pow(encrypted_int_data, self.d, self.n)
-        return uint_to_bytes(int_data) """
+    def decode(self, encrypted_int_data):
+        # int_data = pow(encrypted_int_data, self.__d, self.__n)
+        ans = ''
+        int_data = [elem**self.__d%self.__n for elem in encrypted_int_data]
+        for elem in int_data:
+            ans+=chr(int(str(elem), 2))
+        return ans
+        # m1 = pow(encrypted_int_data, (self.__d % (self.__p - 1)), self.__p)
+        # m2 = pow(encrypted_int_data, (self.__d % (self.__q - 1)), self.__q)
+        # t = m1 - m2
+        # if t < 0:
+        #     t += self.__p
+        # h = (invmod(self.__q, self.__p) * t) % self.__p
+        # m = (m2 + h * self.__q) % self.__n
+        # return uint_to_bytes(m)
+    # """
 # ------------
 
 
@@ -154,7 +179,9 @@ def prime_checker(num):
     return True
 
 a = RSA()
-enc_form = a.encode('maks')
+msg = 'Bodia Пелех 1337 Vlad Max'
+enc_form = a.encode(msg)
+print(msg)
 print(enc_form)
 dec_form = a.decode(enc_form)
 print(dec_form)
