@@ -19,31 +19,31 @@ firstprimes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 6
                1381, 1399, 1409, 1423, 1427, 1429, 1433, 1439, 1447, 1451, 1453, 1459,
                1471, 1481, 1483, 1487, 1489, 1493, 1499]
 
-def isMillerRabinPassed(miller_rabin_candidate):
+def isMillerRabinPassed(prime_number):
     maxDivisionsByTwo = 0
-    evenComponent = miller_rabin_candidate - 1
+    evenComponent = prime_number - 1
     while evenComponent % 2 == 0:
         evenComponent >>= 1
         maxDivisionsByTwo += 1
-    assert (2 ** maxDivisionsByTwo * evenComponent == miller_rabin_candidate - 1)
+    assert (2 ** maxDivisionsByTwo * evenComponent == prime_number - 1)
 
     def trialComposite(round_tester):
-        if pow(round_tester, evenComponent, miller_rabin_candidate) == 1:
+        if pow(round_tester, evenComponent, prime_number) == 1:
             return False
-        for i in range(maxDivisionsByTwo):
-            if pow(round_tester, 2 ** i * evenComponent, miller_rabin_candidate) == miller_rabin_candidate - 1:
+        for j in range(maxDivisionsByTwo):
+            if pow(round_tester, 2 ** j * evenComponent, prime_number) == prime_number - 1:
                 return False
         return True
-    numberOfRabinTrials = 20
+    numberOfRabinTrials = 50
     for i in range(numberOfRabinTrials):
-        round_tester = randrange(2, miller_rabin_candidate)
+        round_tester = randrange(2, prime_number)
         if trialComposite(round_tester):
             return False
     return True
 
 def PrimeNumber():
     while True:
-        prime_number = randint(10 ** 80, 10 ** 110)
+        prime_number = randint(10 ** 200, 10 ** 210)
         flag = True
         for prime in firstprimes:
             if prime_number % prime == 0:
