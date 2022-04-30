@@ -11,13 +11,13 @@ from random import randint
 
 class RSA():
 
-    def __init__(self, keylen:int = 2048) -> None:
+    def __init__(self, keylen: int = 2048) -> None:
         self.keylen = keylen
-        self.__p = randint(1, self.keylen//2) * 2 - 1
-        self.__q = randint(1, self.keylen//2) * 2 - 1
+        # self.__p = randint(1, self.keylen//2) * 2 - 1
+        # self.__q = randint(1, self.keylen//2) * 2 - 1
 
-        # self.__p = 53
-        # self.__q = 67
+        self.__p = 53
+        self.__q = 67
         self.__keygen()
 
     def __keygen(self):
@@ -41,16 +41,14 @@ class RSA():
         self.__n = self.__p * self.__q
         self.__e = randint(1, 10) * 2 - 1
         # self.__e = 17
-        self.__pq = (self.__p -1)*(self.__q -1)
+        self.__pq = (self.__p - 1)*(self.__q - 1)
         while not euclidean(self.__pq, self.__e):
             self.__e = randint(1, 25) * 2 - 1
         self.__d = invmod(self.__e, self.__pq)
         return 1
 
     def encode(self, message):
-        numbers_form = []
-        for i in range(len(message)):
-            numbers_form.append(ord(message[i]))
+        numbers_form = [ord(message[i]) for i in range(len(message))]
         encode_form = []
         for elem in numbers_form:
             encode_form.append(str((elem ** self.__e) % self.__n))
@@ -155,7 +153,11 @@ def prime_checker(num):
                 return False
     return True
 
-
+a = RSA()
+enc_form = a.encode('maks')
+print(enc_form)
+dec_form = a.decode(enc_form)
+print(dec_form)
 # print(ext_euclidean(252, 198))
 # 463513
 # print(prime_checker(649879456898563))
