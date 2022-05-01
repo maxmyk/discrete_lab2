@@ -33,22 +33,20 @@ class Server:
             threading.Thread(target=self.handle_client, args=(c, addr,)).start()
 
     def broadcast(self, msg: str):
-        for client in self.clients: 
+        for client in self.clients:
 
-            # encrypt the message
-
-            # ...
             client.send(msg.encode())
 
     def handle_client(self, c: socket, addr): 
         while True:
             msg = c.recv(1024).decode()
+            msg_hash, msg = msg.split('/')[0], msg.split('/')[1]
             msg = self.server.decrypt(msg)
             for client in self.clients:
                 if client != c:
-
                     msg = self.server.encrypt(msg, (self.username_lookup[client][1]))
-                    client.send(msg.encode())
+                    brunch = msg + '/' + msg_hash
+                    client.send(brunch.encode())
 
 
 if __name__ == "__main__":
