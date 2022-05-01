@@ -26,7 +26,7 @@ class RSA():
         self.__e = PrimeNumber(20)
         self.__d = pow(self.__e, -1, mod=self.__pq)
 
-    def encode(self, message):
+    def encrypt(self, message, key):
         numbers_form = [bin(ch)[2:] for ch in message.encode('utf8')]
         for elem in enumerate(numbers_form):
             while len(numbers_form[elem[0]]) < 8:
@@ -34,23 +34,26 @@ class RSA():
         encode_form = []
         numbers_form = ''.join(numbers_form)
         to_encode = []
-        for i in range(0, len(numbers_form), 8*2):
-            to_encode.append(int(numbers_form[0+i:8*2+i]))
+        for i in range(0, len(numbers_form), 8):
+            to_encode.append(int(numbers_form[0+i:8+i]))
         for elem in to_encode:
-            encode_form.append(str(pow(elem, self.__e, self.__n)))
+            encode_form.append(str(pow(elem, int(key[0]), int(key[1]))))
         return ','.join(encode_form)
 
-    def decode(self, encode_form):
+    def decrypt(self, encode_form):
         message = ""
         for elem in encode_form.split(','):
             pre_chr = str(pow(int(elem), self.__d, self.__n))
-            mem = chr(int(pre_chr[-8:], 2))
-            pre_chr = pre_chr[:-8]
-            if pre_chr[-8:] != '':
-                message += chr(int(pre_chr[-8:], 2))+mem
-            else:
-                message += mem
+            message += chr(int(pre_chr[-8:], 2))
         return message
+    
+    @property
+    def e(self):
+        return self.__e
+
+    @property
+    def n(self):
+        return self.__n
 
     def get_public_key(self):
         return self.__pub_key
@@ -60,6 +63,6 @@ class RSA():
 
 if __name__ == '__main__':
     a = RSA()
-    enc_form = a.encode('Maks and Bodia')
-    dec_form = a.decode(enc_form)
+    enc_form = a.encrypt('Maks and Bodia', a.get_public_key())
+    dec_form = a.decrypt(enc_form)
     print(dec_form)
