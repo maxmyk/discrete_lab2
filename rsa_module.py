@@ -10,8 +10,8 @@ from BigPrimeGen import PrimeNumber
 class RSA():
 
     def __init__(self) -> None:
-        self.__p = PrimeNumber()
-        self.__q = PrimeNumber()
+        self.__p = PrimeNumber(128)
+        self.__q = PrimeNumber(128)
         self.__keygen()
 
         self.__sec_key = (self.__d, self.__n)
