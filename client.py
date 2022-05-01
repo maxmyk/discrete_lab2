@@ -2,52 +2,52 @@ import socket
 import threading
 from rsa_module import RSA
 
-class Server:
-
-    def __init__(self, port: int) -> None:
-        self.host = '127.0.0.1'
+class Client:
+    def __init__(self, server_ip: str, port: int, username: str) -> None:
+        self.server_ip = server_ip
         self.port = port
-        self.clients = []
-        self.username_lookup = {}
-        self.s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+        self.my_client = RSA()
+        self.username = username
 
-    def start(self):
-        self.s.bind((self.host, self.port))
-        self.s.listen(100)
-        self.server = RSA()
+    def init_connection(self):
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            self.s.connect((self.server_ip, self.port))
+        except Exception as e:
+            print("[client]: could not connect to server: ", e)
+            return
+        usern = self.username + ' ' + str(self.my_client.e) + ' ' + str(self.my_client.n)
+        self.s.send(usern.encode())
 
+        key = self.s.recv(1024).decode()
+        self.server_key_e = key.split()[0]
+        self.server_key_n = key.split()[1]
+
+        message_handler = threading.Thread(target=self.read_handler, args=())
+        message_handler.start()
+        input_handler = threading.Thread(target=self.write_handler, args=())
+        input_handler.start()
+
+    def read_handler(self): 
         while True:
-            c, addr = self.s.accept()
-            rec = c.recv(1024).decode()
-            username = rec.split()[0]
-            other_key_e = rec.split()[1]
-            other_key_n = rec.split()[2]
-            print(f"{username} tries to connect")
-            self.broadcast(f'new person has joined: {username}')
-            self.username_lookup[c] = (username, (int(other_key_e), int(other_key_n)))
-            self.clients.append(c)
-            # send public key to the client
-            key = str(self.server.e) + ' ' + str(self.server.n)
-            c.send(key.encode())
+            message = self.s.recv(1024).decode()
+            if message[:3] != "new":
+                message, message_hash = message.split('/')[0], message.split('/')[1]
+                message = self.my_client.decrypt(message)
+                if message_hash == str(self.my_client.hash(message)):
+                    print(message)
+                else:
+                    pass
+            else:
+                pass
 
-            threading.Thread(target=self.handle_client, args=(c, addr,)).start()
-
-    def broadcast(self, msg: str):
-        for client in self.clients:
-            
-            client.send(msg.encode())
-
-    def handle_client(self, c: socket, addr): 
+    def write_handler(self):
         while True:
-            msg = c.recv(1024).decode()
-            msg = self.server.decrypt(msg)
-            for client in self.clients:
-                if client != c:
-
-                    msg = self.server.encrypt(msg, (self.username_lookup[client][1]))
-                    client.send(msg.encode())
-
+            message = input()
+            message_hash = self.my_client.hash(message)
+            brunch = str(message_hash) + '/' + self.my_client.encrypt(message, (self.server_key_e, self.server_key_n))
+            self.s.send(brunch.encode())
 
 if __name__ == "__main__":
-    s = Server(9001)
-    s.start()
+    cl = Client("127.0.0.1", 9001, "b_g")
+    cl.init_connection()
