@@ -39,11 +39,11 @@ class RSA():
             to_encode.append(int(numbers_form[0+i:longest_chr*2+i]))
         for elem in to_encode:
             encode_form.append(str(pow(elem, self.__e, self.__n)))
-        return encode_form
+        return ','.join(encode_form)
 
     def decode(self, encode_form):
         message = ""
-        for elem in encode_form:
+        for elem in encode_form.split(','):
             pre_chr = str(pow(int(elem), self.__d, self.__n))
             mem = chr(int(pre_chr[-7:], 2))
             pre_chr = pre_chr[:-7]
