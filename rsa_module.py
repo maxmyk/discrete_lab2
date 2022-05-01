@@ -28,15 +28,14 @@ class RSA():
 
     def encode(self, message):
         numbers_form = [bin(ch)[2:] for ch in message.encode('utf8')]
-        longest_chr = len(max(numbers_form, key=lambda x: len(x)))
         for elem in enumerate(numbers_form):
-            while len(numbers_form[elem[0]]) < longest_chr:
+            while len(numbers_form[elem[0]]) < 8:
                 numbers_form[elem[0]] = '0'+numbers_form[elem[0]]
         encode_form = []
         numbers_form = ''.join(numbers_form)
         to_encode = []
-        for i in range(0, len(numbers_form), longest_chr*2):
-            to_encode.append(int(numbers_form[0+i:longest_chr*2+i]))
+        for i in range(0, len(numbers_form), 8*2):
+            to_encode.append(int(numbers_form[0+i:8*2+i]))
         for elem in to_encode:
             encode_form.append(str(pow(elem, self.__e, self.__n)))
         return ','.join(encode_form)
@@ -45,9 +44,12 @@ class RSA():
         message = ""
         for elem in encode_form.split(','):
             pre_chr = str(pow(int(elem), self.__d, self.__n))
-            mem = chr(int(pre_chr[-7:], 2))
-            pre_chr = pre_chr[:-7]
-            message += chr(int(pre_chr[-7:], 2))+mem
+            mem = chr(int(pre_chr[-8:], 2))
+            pre_chr = pre_chr[:-8]
+            if pre_chr[-8:] != '':
+                message += chr(int(pre_chr[-8:], 2))+mem
+            else:
+                message += mem
         return message
 
     def get_public_key(self):
