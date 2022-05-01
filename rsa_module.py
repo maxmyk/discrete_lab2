@@ -27,24 +27,29 @@ class RSA():
         self.__d = pow(self.__e, -1, mod=self.__pq)
 
     def encrypt(self, message, key):
-        numbers_form = [bin(ch)[2:] for ch in message.encode('utf8')]
-        for elem in enumerate(numbers_form):
-            while len(numbers_form[elem[0]]) < 8:
-                numbers_form[elem[0]] = '0'+numbers_form[elem[0]]
+        numbers_form = [ch for ch in message.encode('utf8')]
         encode_form = []
-        numbers_form = ''.join(numbers_form)
         to_encode = []
-        for i in range(0, len(numbers_form), 8):
-            to_encode.append(int(numbers_form[0+i:8+i]))
+        block = 0
+        while numbers_form != []:
+            to_encode.append(bytearray())
+            for _ in range(0, 156):
+                try:
+                    to_encode[block].append(numbers_form.pop(0))
+                except IndexError:
+                    break
+            block +=1
         for elem in to_encode:
-            encode_form.append(str(pow(elem, int(key[0]), int(key[1]))))
+            encode_form.append(str(pow(int.from_bytes(elem, byteorder='big'), int(key[0]), int(key[1]))))
         return ','.join(encode_form)
 
     def decrypt(self, encode_form):
         message = ""
         for elem in encode_form.split(','):
-            pre_chr = str(pow(int(elem), self.__d, self.__n))
-            message += chr(int(pre_chr[-8:], 2))
+            pre_chr = pow(int(elem), self.__d, self.__n)
+            pre_chr = pre_chr.to_bytes(156, 'big')
+            for elem in pre_chr:
+                message += chr(elem)
         return message
     
     @property
