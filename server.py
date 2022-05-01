@@ -1,5 +1,6 @@
 import socket
 import threading
+from rsa_module import RSA
 
 class Server:
 
@@ -13,30 +14,23 @@ class Server:
     def start(self):
         self.s.bind((self.host, self.port))
         self.s.listen(100)
-
-        # generate keys ...
+        self.server = RSA()
 
         while True:
             c, addr = self.s.accept()
-            username = c.recv(1024).decode()
+            rec = c.recv(1024).decode()
+            username = rec.split()[0]
+            other_key_e = rec.split()[1]
+            other_key_n = rec.split()[2]
             print(f"{username} tries to connect")
             self.broadcast(f'new person has joined: {username}')
-            self.username_lookup[c] = username
+            self.username_lookup[c] = (username, (int(other_key_e), int(other_key_n)))
             self.clients.append(c)
+            # send public key to the client
+            key = str(self.server.e) + ' ' + str(self.server.n)
+            c.send(key.encode())
 
-            # send public key to the client 
-
-            # ...
-
-            # encrypt the secret with the clients public key
-
-            # ...
-
-            # send the encrypted secret to a client 
-
-            # ...
-
-            threading.Thread(target=self.handle_client,args=(c,addr,)).start()
+            threading.Thread(target=self.handle_client, args=(c, addr,)).start()
 
     def broadcast(self, msg: str):
         for client in self.clients: 
@@ -44,16 +38,18 @@ class Server:
             # encrypt the message
 
             # ...
-
             client.send(msg.encode())
 
     def handle_client(self, c: socket, addr): 
         while True:
-            msg = c.recv(1024)
-
+            msg = c.recv(1024).decode()
+            msg = self.server.decrypt(msg)
             for client in self.clients:
                 if client != c:
-                    client.send(msg)
+
+                    msg = self.server.encrypt(msg, (self.username_lookup[client][1]))
+                    client.send(msg.encode())
+
 
 if __name__ == "__main__":
     s = Server(9001)
