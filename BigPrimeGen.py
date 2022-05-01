@@ -1,4 +1,4 @@
-from random import randint, randrange
+from random import randrange
 
 firstprimes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61,
                67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137,
@@ -43,9 +43,9 @@ def isMillerRabinPassed(prime_number):
     return True
 
 
-def PrimeNumber(num=200):
+def PrimeNumber(n):
     while True:
-        prime_number = randint(10 ** num, 10 ** (num+10))
+        prime_number = randrange(2**(n-1)+1, 2**n-1)
         flag = True
         for prime in firstprimes:
             if prime_number % prime == 0:
