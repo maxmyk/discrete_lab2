@@ -49,7 +49,8 @@ class RSA():
             pre_chr = pow(int(elem), self.__d, self.__n)
             pre_chr = pre_chr.to_bytes(156, 'big')
             for elem in pre_chr:
-                message += chr(elem)
+                if elem != 0:
+                    message += chr(elem)
         return message
     
     @property
