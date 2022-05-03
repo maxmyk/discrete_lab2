@@ -27,31 +27,62 @@ class RSA():
         self.__d = pow(self.__e, -1, mod=self.__pq)
 
     def encrypt(self, message, key):
-        numbers_form = [ch for ch in message.encode('utf8')]
-        encode_form = []
-        to_encode = []
-        block = 0
-        while numbers_form != []:
-            to_encode.append(bytearray())
-            for _ in range(0, 256):
-                try:
-                    to_encode[block].append(numbers_form.pop(0))
-                except IndexError:
-                    break
-            block +=1
-        for elem in to_encode:
-            encode_form.append(str(pow(int.from_bytes(elem, byteorder='big'), int(key[0]), int(key[1]))))
-        return ','.join(encode_form)
+        numbers_form = []
+        for ch in message:
+            numbers_form.append(ord(ch))
+        encode_str = ''
+        ind = 0
+        while ind < len(numbers_form):
+            temp = str(numbers_form[ind])
+            while len(temp) < 4:
+                temp = '0' + temp
+            encode_str += temp
+            ind += 1
+        encode_form = ''
+        ln = len(str(key[1]))
+        last_ind = 0
+        for i in range(len(encode_str)):
+            if i % ln == 0 and i != 0:
+                encode_form += str(pow(int(encode_str[i - ln: i]), int(key[0]), int(key[1]))) + ','
+                last_ind = i
+        if last_ind == 0:
+            encode_form = str(pow(int(encode_str), int(key[0]), int(key[1])))
+        else:
+            try:
+                encode_form += str(pow(int(encode_str[last_ind:]), int(key[0]), int(key[1])))
+            except:
+                pass
+        # encode_form = str(pow(int(encode_str), key[0], key[1]))
+        return encode_form.strip(',')
 
     def decrypt(self, encode_form):
         message = ""
-        for elem in encode_form.split(','):
-            pre_chr = pow(int(elem), self.__d, self.__n)
-            pre_chr = pre_chr.to_bytes(256, 'big')
-            for elem in pre_chr:
-                if elem != 0:
-                    message += chr(elem)
+        msg = ''
+        for i in encode_form.split(','):
+            msg += str(pow(int(i), self.__d, self.__n))
+        # msg = str(pow(int(encode_form), self.__d, self.__n))
+        count = 0
+        last_ind = 0
+        for i in range(len(msg) - 1, -1, -1):
+            count += 1
+            if count == 4:
+                message = chr(int(msg[i:i + count])) + message
+                last_ind = i
+                count = 0
+        if last_ind != 0:
+            message = chr(int(msg[0:last_ind])) + message
+        try:
+            if last_ind == 0 and message == '':
+                message = chr(int(msg)) + message
+        except:
+            pass
         return message
+
+    def hash(self, string):
+        hash = 0
+        for i in range(len(string)):
+            hash = (hash * 229 ^ ord(string[i]) * 897) & 0xFFFFFFFF
+        return hash
 
     @property
     def e(self):
@@ -67,8 +98,8 @@ class RSA():
 # ------------
 
 
-if __name__ == '__main__':
-    a = RSA()
-    enc_form = a.encrypt('Maks and Bodia', a.get_public_key())
-    dec_form = a.decrypt(enc_form)
-    print(dec_form)
+# if __name__ == '__main__':
+#     a = RSA()
+#     enc_form = a.encrypt('sadsadsadssafhdjsfhdjkghfjghfjghfjghjfgadsa', a.get_public_key())
+#     dec_form = a.decrypt(enc_form)
+#     print(dec_form)
